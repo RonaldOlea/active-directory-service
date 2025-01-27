@@ -5,7 +5,6 @@ package com.sandbox.bsp.gov.ph.active_directory.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.sandbox.bsp.gov.ph.active_directory.model.CredentialResponse;
@@ -66,7 +65,6 @@ public class ActiveDirectoryService {
 				+ directoryContext.getDomain());
 
 		// Attempt authentication
-		CredentialResponse credResponse = new CredentialResponse();
 		int authenticationResult = context.setContext(credentials);
 		boolean isAuthenticated = false;
 
