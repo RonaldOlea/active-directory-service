@@ -1,20 +1,13 @@
 name: Test Active Directory Service
 
 on:
-  push:
-    branches:
-      - main
   workflow_run:
     workflows: ["Build Active Directory Service"]
     types:
       - completed
 
 permissions:
-  # Read the status of the triggering workflow and access repository data
-  actions: read
-  checks: read
-  contents: read
-  id-token: write
+  contents: write
 
 jobs:
   test:
@@ -22,22 +15,15 @@ jobs:
 
     steps:
     - name: Log Start of Test Workflow
-      run: echo "Starting the test workflow"
-    
+      run: echo "Starting the test workflow..."
+
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Checkout to the code
-      run: echo "Checking out"
-
-    # Download the JAR file from the build workflow
     - name: Download JAR from Build Workflow
       uses: actions/download-artifact@v4
       with:
         name: app-jar-${{github.sha}}
-
-    - name: Downloaded JAR
-      run: echo "JAR downloaded"
 
     - name: Set up JDK 17
       uses: actions/setup-java@v3
@@ -53,6 +39,11 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-maven-
 
-    # Run tests using Maven
+    - name: Log Before Tests
+      run: echo "Running tests..."
+
     - name: Run Tests
       run: mvn test -X
+
+    - name: Log After Tests
+      run: echo "Tests completed."
