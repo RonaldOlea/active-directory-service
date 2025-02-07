@@ -53,3 +53,17 @@ jobs:
 
     - name: Run Tests Complete
       run: echo "Run Tests Completed"
+
+  build-image:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Build Docker Start
+        run: echo "Run Build Docker Start"
+      - name: Build the Docker image
+        run: docker build -t active-directory-service:${{github.sha}} .
+      - name: Run Docker Build Complete
+        run: echo "Run Dcker Build Completed"
