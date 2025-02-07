@@ -7,7 +7,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  builds:
     runs-on: ubuntu-latest
 
     steps:
@@ -34,7 +34,7 @@ jobs:
     #  with:
     #    github_token: ${{ secrets.GITHUB_TOKEN }}
 
-  test:
+  tests:
     needs: build
     runs-on: ubuntu-latest
 
