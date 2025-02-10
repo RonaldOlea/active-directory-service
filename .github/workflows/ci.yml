@@ -89,4 +89,4 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_IMAGE }}:latest
           context: .
-          file: ./active-directory-service/Dockerfile
+          file: ./Dockerfile
