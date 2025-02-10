@@ -85,4 +85,6 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: olearb/active-directory-image:latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_IMAGE }}:latest
+          context: .
+          file: ./Dockerfile
