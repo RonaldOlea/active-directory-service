@@ -97,8 +97,11 @@ jobs:
         with:
           name: target-directory
 
+      - name: List directory after downloading artifact
+        run: ls -l
+
       - name: Move target directory
-        run: mv target-directory ./target
+        run: mv target-directory/target ./target
 
       - name: List target directory
         run: ls -l target/
