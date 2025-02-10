@@ -29,11 +29,11 @@ jobs:
     - name: List target directory
       run: ls -l target/
 
-    - name: Upload target directory as artifact
+    - name: Upload jar as artifact
       uses: actions/upload-artifact@v4
       with:
-        name: target-directory/target
-        path: target/
+        name: ${{ vars.DOCKERHUB_IMAGE }}
+        path: target/*.jar
 
     # TODO: The workflow permissions should be set to "Read and Write" to test this part.
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
@@ -101,7 +101,7 @@ jobs:
         run: ls -l
 
       - name: Move target directory
-        run: mv target-directory/target ./target
+        run: mv ${{ vars.DOCKERHUB_IMAGE }} ./target
 
       - name: List target directory
         run: ls -l target/
