@@ -26,6 +26,9 @@ jobs:
     - name: Run Build Complete
       run: echo "Run Build Completed"
 
+    - name: List target directory
+      run: ls -l target/
+
     # TODO: The workflow permissions should be set to "Read and Write" to test this part.
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     # Submitting the graph improves the quality of Dependabot’s checks.
