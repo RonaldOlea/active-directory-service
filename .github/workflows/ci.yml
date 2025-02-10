@@ -100,7 +100,7 @@ jobs:
       - name: List directory after downloading artifact
         run: ls -l
 
-      - name: Move target directory
+      - name: Move target directorys
         run: mv ${{ vars.JAR_NAME }}.jar ./target
 
       - name: List target directory
