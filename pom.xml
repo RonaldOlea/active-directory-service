@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.sandbox.bsp.gov.ph</groupId>
-	<artifactId>active_directory</artifactId>
+	<artifactId>active-directory</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>active_directory</name>
+	<name>active-directory</name>
 	<description>Sandbox project for Spring Boot</description>
 	<url/>
 	<licenses>
