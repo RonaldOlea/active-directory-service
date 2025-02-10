@@ -37,7 +37,7 @@ jobs:
   test:
     needs: build
     runs-on: ubuntu-latest
-
+  
     steps: 
     - uses: actions/checkout@v4
     - name: Set up JDK 17
@@ -46,24 +46,40 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
-
+  
     # Run tests using Maven
     - name: Run Tests
       run: mvn test -X
-
+  
     - name: Run Tests Complete
       run: echo "Run Tests Completed"
+  
+  login:
+    needs: test
+    runs-on: ubuntu-latest
+  
+    steps:
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.GITHUB_USERNAME }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-  build-image:
-    needs: build
+  build-image-test:
+    needs: login
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      # It helps you run builds on architectures like amd64, arm64, etc.
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
 
-      - name: Run Build Docker Start
-        run: echo "Run Build Docker Start"
-      - name: Build the Docker image
-        run: docker build -t active-directory-service:${{github.sha}} .
-      - name: Run Docker Build Complete
-        run: echo "Run Dcker Build Completed"
+      # It allows for multi-platform builds, build caching, and more efficient Docker image builds.
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: ${{ secrets.GITHUB_USERNAME }}/active-directory-image:latest
