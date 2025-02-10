@@ -95,7 +95,7 @@ jobs:
       - name: Download target directory
         uses: actions/download-artifact@v4
         with:
-          name: target-directory
+          name: ${{ vars.DOCKERHUB_IMAGE }}
 
       - name: List directory after downloading artifact
         run: ls -l
