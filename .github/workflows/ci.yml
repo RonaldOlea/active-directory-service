@@ -82,4 +82,4 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: ${{ secrets.GITHUB_USERNAME }}/active-directory-image:latest
+          tags: ${{ secrets.DOCERHUB_USERNAME }}/{{ vars.DOCKERHUB_IMAGE }}:latest
