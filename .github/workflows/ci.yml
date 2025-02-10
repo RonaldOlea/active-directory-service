@@ -56,6 +56,9 @@ jobs:
   
     - name: Run Tests Complete
       run: echo "Run Tests Completed"
+
+    - name: List target directory
+      run: ls -l target/
   
   login:
     needs: test
@@ -68,12 +71,18 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
+      - name: List target directory
+        run: ls -l target/
+
   build-image-test:
     needs: login
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: List target directory
+        run: ls -l target/
     
       # It helps you run builds on architectures like amd64, arm64, etc.
       - name: Set up QEMU
