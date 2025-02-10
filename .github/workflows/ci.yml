@@ -29,6 +29,12 @@ jobs:
     - name: List target directory
       run: ls -l target/
 
+    - name: Upload target directory as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: target-directory
+        path: target/
+
     # TODO: The workflow permissions should be set to "Read and Write" to test this part.
     # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
     # Submitting the graph improves the quality of Dependabot’s checks.
@@ -82,6 +88,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: List target directory
+        run: ls -l target/
+
+      - name: Download target directory
+        uses: actions/download-artifact@v4
+        with:
+          name: target-directory
 
       - name: List target directory
         run: ls -l target/
