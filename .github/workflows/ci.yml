@@ -98,7 +98,7 @@ jobs:
           name: target-directory
 
       - name: List target directory
-        run: ls -l target/
+        run: ls -l target-directory/
     
       # It helps you run builds on architectures like amd64, arm64, etc.
       - name: Set up QEMU
