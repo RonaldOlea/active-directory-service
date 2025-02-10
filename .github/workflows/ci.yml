@@ -101,7 +101,7 @@ jobs:
         run: ls -l
 
       - name: Move target directory
-        run: mv ${{ vars.DOCKERHUB_IMAGE }} ./target
+        run: mv *.jar ./target
 
       - name: List target directory
         run: ls -l target/
