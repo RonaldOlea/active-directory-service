@@ -70,6 +70,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v4
+    
       # It helps you run builds on architectures like amd64, arm64, etc.
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
