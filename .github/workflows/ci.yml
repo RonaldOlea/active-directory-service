@@ -97,8 +97,11 @@ jobs:
         with:
           name: target-directory
 
+      - name: Move target directory
+        run: mv target-directory ./target
+
       - name: List target directory
-        run: ls -l target-directory/
+        run: ls -l target/
     
       # It helps you run builds on architectures like amd64, arm64, etc.
       - name: Set up QEMU
