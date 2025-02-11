@@ -65,14 +65,14 @@ jobs:
 
     - name: List target directory
       run: ls -l target/
-  
-  login:
+  build-image-test:
     needs: test
     runs-on: ubuntu-latest
-  
+
     steps:
       - uses: actions/checkout@v4
-    
+
+      # Login to the Docker Hub
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -82,17 +82,8 @@ jobs:
       - name: List target directory
         run: ls -l target/
 
-  build-image-test:
-    needs: login
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: List target directory
-        run: ls -l target/
-
-      - name: Download target directory
+      # Download the jar file.
+      - name: Download the JAR file
         uses: actions/download-artifact@v4
         with:
           name: ${{ vars.JAR_NAME }}
