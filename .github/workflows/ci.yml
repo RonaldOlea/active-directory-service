@@ -26,9 +26,6 @@ jobs:
     - name: Run Build Complete
       run: echo "Run Build Completed"
 
-    - name: List target directory
-      run: ls -l target/
-
     - name: Upload jar as artifact
       uses: actions/upload-artifact@v4
       with:
@@ -62,10 +59,8 @@ jobs:
   
     - name: Run Tests Complete
       run: echo "Run Tests Completed"
-
-    - name: List target directory
-      run: ls -l target/
-  build-image-test:
+      
+  build-and-push-docker-image:
     needs: test
     runs-on: ubuntu-latest
 
@@ -79,9 +74,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: List target directory
-        run: ls -l target/
-
       # Download the jar file.
       - name: Download the JAR file
         uses: actions/download-artifact@v4
@@ -93,9 +85,6 @@ jobs:
 
       - name: Move target directory
         run: mv *.jar ./target
-
-      - name: List target directory
-        run: ls -l target/
     
       # It helps you run builds on architectures like amd64, arm64, etc.
       - name: Set up QEMU
@@ -115,3 +104,6 @@ jobs:
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_IMAGE }}:latest
           context: .
           file: ./Dockerfile
+
+      - name: Build and Push Docker Image Complete
+        run: echo "Build and Push Docker Image Complete" 
