@@ -5,6 +5,8 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+    paths:
+      - '**/pom.xml'
 
 jobs:
   build:
@@ -21,7 +23,9 @@ jobs:
 
     # Build the application using Maven  
     - name: Build with Maven
-      run: mvn -B package --file pom.xml -DskipTests
+      run: |
+        mvn dependency:purge-local-repository
+        mvn -B package --file pom.xml -DskipTests
 
     - name: Run Build Complete
       run: echo "Run Build Completed"
