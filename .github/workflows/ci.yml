@@ -8,18 +8,7 @@ on:
     paths:
       - '**/pom.xml'
 
-jobs:
-  dependabot:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: Trigger Dependabot Update
-        run: |
-          curl -X POST -H "Authorization": token ${{ secrets.GITHUB_TOKEN }}" \
-          -d '{"event_type":"dependabot"}' \
-          https://api-github.com/repos/${{github.repository}}/dispatches
-          
+jobs:     
   build:
     runs-on: ubuntu-latest
 
