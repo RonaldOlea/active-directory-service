@@ -78,6 +78,7 @@ jobs:
             git push origin update-dependencies-branch
   
             gh pr create --base main --head update-dependencies-branch --title "Update dependencies" --body "Automated dependency updates"
+          fi
         else
           echo "No outdated dependencies found."
         fi
