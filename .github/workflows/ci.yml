@@ -55,8 +55,8 @@ jobs:
         distribution: 'temurin'
         cache: maven
 
-    # - name: Install dependencies using maven
-    #  run: mvn install -DskipTests
+    - name: Install dependencies using maven
+      run: mvn install -DskipTests
 
     - name: Create Pull Request if Dependencies are outdated
       run: |
