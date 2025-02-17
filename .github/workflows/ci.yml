@@ -77,7 +77,7 @@ jobs:
             echo "Changes detected, creating a pull request."
 
             # Generate a unique branch name and create new branch for the update
-            branch_name="update-dependencies-$(date +%Y%m%d&H&M&S)"
+            branch_name="update-dependencies-$(date +%Y%m%d%H%M%S)"
             git checkout -b "$branch_name"
 
             # Set git user details for commit
