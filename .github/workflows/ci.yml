@@ -60,6 +60,8 @@ jobs:
 
     - name: Create Pull Request if Dependencies are outdated
       run: |
+        echo Checking for dependency updates."
+        mvn versions:display-dependency-updates
         if mvn versions:display-dependency-updates | grep -q 'newer version'; then
           echo "Outdated dependencies found."
           mvn versions:use-latest-versions -DallowSnapshots=false
