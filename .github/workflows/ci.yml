@@ -65,12 +65,13 @@ jobs:
           mvn versions:use-latest-versions -DallowSnapshots=true
           echo "After force update."
           git status
+          git checkout -b update-dependencies-branch
           git config --global user.name "Github Actions"
           git config --global user.email "actions@github.com"
 
           git add pom.xml
           git commit -m "Update dependencies"
-          git push origin main
+          git push origin update-dependencies-branch
 
           gh pr create --base main --head update-dependencies-branch --title "Update dependencies" --body "Automated dependency updates"
         else
