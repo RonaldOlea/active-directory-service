@@ -3,12 +3,13 @@
 # Please see the documentation for all configuration options:
 # https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
 
-version: 2
+version: 3
 updates:
   - package-ecosystem: "maven" # For java projects
     directory: "/" # Location of package manifests
     schedule:
       interval: "daily" # Choose between "daily", "weekly", or "monthly"
+      time: "2:35" # 2 AM UTC (which is 10:35 AM Philippine Time)
     commit-message:
       prefix: "fix: "
     allow:
