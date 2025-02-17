@@ -65,7 +65,8 @@ jobs:
         dependency_updates=$(mvn versions:display-dependency-updates)
 
         # Only continue if there are new dependencies
-        if echo "$dependency_updates" | grep -q 'newer versions'; then
+        # if echo "$dependency_updates" | grep -q 'newer versions'; then
+        if [[ "$dependency_updates" == *"newer versions"* ]]; then
           echo "Outdated dependencies found."
 
           # Update dependencies to the latest versions
