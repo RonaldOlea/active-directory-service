@@ -60,27 +60,37 @@ jobs:
 
     - name: Create Pull Request if Dependencies are outdated
       run: |
-        echo "Checking for dependency updates."
-        dependency_updates=$(mvn versions:display-dependency-updates)
-        echo "$dependency_updates"
-        if echo "$dependency_updates" | grep -q 'newer versions'; then
-          echo "Outdated dependencies found."
-          mvn versions:use-latest-versions -DallowSnapshots=false
+        echo "Check for dependency updates"
+        # Check for dependency updates
+        # dependency_updates=$(mvn versions:display-dependency-updates)
 
-          echo "Checking pom if there has changes."
-          if git diff --exit-code --quiet; then
-            echo "No changes to commit."
-          else
-            git status
-            git checkout -b update-dependencies-branch
+        # Only continue if there are new dependencies
+        if echo mvn versions:display-dependency-updates | grep -q 'newer versions'; then
+          echo "Outdated dependencies found."
+
+          # Update dependencies to the latest versions
+          mvn versions:use-latest-versions -DallowSnapshots=false
+          mvn versions:update-parent -DartifactId=spring-boot-starter-parent -DgroupId=org.springframework.boot
+
+          echo "Check if there are changes in pom.xml"
+          if ! git diff --exit-code --quiet; then
+            echo "Changes detected, creating a pull request."
+
+            # Generate a unique branch name and create new branch for the update
+            branch_name="update-dependencies-$(date +%Y%m%d&H&M&S)"
+            git checkout -b "$branch_name"
+
+            # Set git user details for commit
             git config --global user.name "Github Actions"
             git config --global user.email "actions@github.com"
-  
+
+            # Commit, push the change, and create a PR
             git add pom.xml
             git commit -m "Update dependencies"
-            git push origin update-dependencies-branch
-  
-            gh pr create --base main --head update-dependencies-branch --title "Update dependencies" --body "Automated dependency updates"
+            git push origin "$branch_name"
+            gh pr create --base main --head "$branch_name" --title "Update dependencies" --body "Automated dependency updates"
+          else
+            echo "No changes detected in pom.xml. No pull request needed."
           fi
         else
           echo "No outdated dependencies found."
