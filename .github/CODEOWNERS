@@ -1,5 +1,3 @@
-# This will require approvals from the specified code owner 
-# Assign owners to all files inside the .github folder.
-# .github/* @RonaldOlea
-# Assign owners to all files inside any subdirectories of .github folder.
+# This will require approvals from the specified code owner
+# Assign owners for all files and directories within the .github folder.
 .github/** @RonaldOlea
