@@ -63,17 +63,21 @@ jobs:
         if mvn versions:display-dependency-updates | grep -q 'newer version'; then
           echo "Outdated dependencies found."
           mvn versions:use-latest-versions -DallowSnapshots=false
-          echo "After force update."
-          git status
-          git checkout -b update-dependencies-branch
-          git config --global user.name "Github Actions"
-          git config --global user.email "actions@github.com"
 
-          git add pom.xml
-          git commit -m "Update dependencies"
-          git push origin update-dependencies-branch
-
-          gh pr create --base main --head update-dependencies-branch --title "Update dependencies" --body "Automated dependency updates"
+          echo "Checking pom if there has changes."
+          if git diff --exit-code --quiet; then
+            echo "No changes to commit."
+          else
+            git status
+            git checkout -b update-dependencies-branch
+            git config --global user.name "Github Actions"
+            git config --global user.email "actions@github.com"
+  
+            git add pom.xml
+            git commit -m "Update dependencies"
+            git push origin update-dependencies-branch
+  
+            gh pr create --base main --head update-dependencies-branch --title "Update dependencies" --body "Automated dependency updates"
         else
           echo "No outdated dependencies found."
         fi
