@@ -62,7 +62,7 @@ jobs:
       run: |
         if mvn versions:display-dependency-updates | grep -q 'newer version'; then
           echo "Outdated dependencies found."
-          mvn versions:use-latest-versions -DallowSnapshots=true
+          mvn versions:use-latest-versions
           echo "After force update."
           git status
           git checkout -b update-dependencies-branch
