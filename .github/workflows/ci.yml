@@ -61,8 +61,9 @@ jobs:
     - name: Create Pull Request if Dependencies are outdated
       run: |
         if mvn versions:display-dependency-updates | grep -q 'newer version'; then
+          echo "Outdated dependencies found."
           mvn versions:use-latest-versions -DallowSnapshots=true
-          
+          echo "After force update."
           git status
           git config --global user.name "Github Actions"
           git config --global user.email "actions@github.com"
