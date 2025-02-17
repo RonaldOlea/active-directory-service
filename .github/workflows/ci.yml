@@ -128,8 +128,10 @@ jobs:
       - name: List directory after downloading artifact
         run: ls -l
 
-      - name: Move target directory
-        run: mv *.jar ./target
+      - name: Create the target directory and move the JAR file.
+        run: |
+          mkdir -p target
+          mv *.jar ./target
     
       # It helps you run builds on architectures like amd64, arm64, etc.
       - name: Set up QEMU
