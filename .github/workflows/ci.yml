@@ -62,10 +62,10 @@ jobs:
       run: |
         echo "Check for dependency updates"
         # Check for dependency updates
-        # dependency_updates=$(mvn versions:display-dependency-updates)
+        dependency_updates=$(mvn versions:display-dependency-updates)
 
         # Only continue if there are new dependencies
-        if echo mvn versions:display-dependency-updates | grep -q 'newer versions'; then
+        if echo "$dependency_updates" | grep -q 'newer versions'; then
           echo "Outdated dependencies found."
 
           # Update dependencies to the latest versions
