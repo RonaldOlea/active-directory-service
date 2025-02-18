@@ -45,6 +45,9 @@ jobs:
   update-dependencies:
     needs: build
     runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_PR_EXIST: 'false'
 
     steps:
     - uses: actions/checkout@v4
@@ -58,6 +61,16 @@ jobs:
     - name: Install dependencies using maven
       run: mvn install -DskipTests
 
+    - name: Check if a Pull Request exists
+      run: |
+        # Check if there is an open pull request with the title "${{ vars.DEPENDENCY_MANUAL_UPDATE_TITLE }}"
+        pr_exists=$(gh pr list --state open --search "${{ vars.DEPENDENCY_MANUAL_UPDATE_TITLE }}" --json title -q ".[].title")
+        if [[ ! -z "$pr_exists" ]]; then
+          echo "A pull request already exists."
+          echo "GITHUB_PR_EXIST=true"
+          exit 0
+        fi
+
     - name: Create Pull Request if Dependencies are outdated
       run: |
         echo "Check for dependency updates"
@@ -65,8 +78,8 @@ jobs:
         dependency_updates=$(mvn versions:display-dependency-updates)
 
         # Only continue if there are new dependencies
-        # if echo "$dependency_updates" | grep -q 'newer versions'; then
-        if [[ "$dependency_updates" == *"newer versions"* ]]; then
+        echo "$GITHUB_PR_EXIST"
+        if [[ "$GITHUB_PR_EXIST" == 'false' ]] && [[ "$dependency_updates" == *"newer versions"* ]]; then
           echo "Outdated dependencies found."
 
           # Update dependencies to the latest versions
@@ -89,15 +102,13 @@ jobs:
             git add pom.xml
             git commit -m "Update dependencies"
             git push origin "$branch_name"
-            gh pr create --base main --head "$branch_name" --title "Update dependencies" --body "Automated dependency updates"
+            gh pr create --base main --head "$branch_name" --title "${{ vars.DEPENDENCY_MANUAL_UPDATE_TITLE }}" --body "Automated dependency updates"
           else
             echo "No changes detected in pom.xml. No pull request needed."
           fi
         else
           echo "No outdated dependencies found."
         fi
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   test:
     needs: update-dependencies
