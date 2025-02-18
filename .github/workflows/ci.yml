@@ -68,7 +68,8 @@ jobs:
         if [[ ! -z "$pr_exists" ]]; then
           echo "A pull request already exists."
           echo "GITHUB_PR_EXIST=true" >> $GITHUB_ENV
-          exit 0
+        else
+          echo "Pull Request not found"
         fi
 
     - name: Create Pull Request if not exists and dependencies are outdated
