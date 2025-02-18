@@ -9,7 +9,6 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "daily" # Choose between "daily", "weekly", or "monthly"
-      # time: "4:00" # 4 AM UTC (which is 12:00 PM Philippine Time)
     commit-message:
       prefix: "fix: "
     allow:
