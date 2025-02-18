@@ -61,7 +61,7 @@ jobs:
     - name: Check if a Pull Request exists
       run: |
         # Check if there is an open pull request with the title "${{ vars.DEPENDENCY_MANUAL_UPDATE_TITLE }}"
-        pr_exists=$(gh pr list --state open --search ${{ vars.DEPENDENCY_MANUAL_UPDATE_TITLE }} --json title -q ".[].title")
+        pr_exists=$(gh pr list --state open --search "${{ vars.DEPENDENCY_MANUAL_UPDATE_TITLE }}" --json title -q ".[].title")
         if [[ ! -z "$pr_exists" ]]; then
           echo "A pull request already exists."
           exit 0
@@ -98,7 +98,7 @@ jobs:
             git add pom.xml
             git commit -m "Update dependencies"
             git push origin "$branch_name"
-            gh pr create --base main --head "$branch_name" --title ${{ vars.DEPENDENCY_MANUAL_UPDATE_TITLE }} --body "Automated dependency updates"
+            gh pr create --base main --head "$branch_name" --title "${{ vars.DEPENDENCY_MANUAL_UPDATE_TITLE }}" --body "Automated dependency updates"
           else
             echo "No changes detected in pom.xml. No pull request needed."
           fi
