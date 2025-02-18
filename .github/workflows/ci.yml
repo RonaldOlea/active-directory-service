@@ -45,6 +45,8 @@ jobs:
   update-dependencies:
     needs: build
     runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
     - uses: actions/checkout@v4
@@ -74,7 +76,6 @@ jobs:
         dependency_updates=$(mvn versions:display-dependency-updates)
 
         # Only continue if there are new dependencies
-        # if echo "$dependency_updates" | grep -q 'newer versions'; then
         if [[ "$dependency_updates" == *"newer versions"* ]]; then
           echo "Outdated dependencies found."
 
@@ -105,8 +106,6 @@ jobs:
         else
           echo "No outdated dependencies found."
         fi
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   test:
     needs: update-dependencies
