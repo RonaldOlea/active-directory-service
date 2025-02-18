@@ -67,7 +67,7 @@ jobs:
         pr_exists=$(gh pr list --state open --search "${{ vars.DEPENDENCY_MANUAL_UPDATE_TITLE }}" --json title -q ".[].title")
         if [[ ! -z "$pr_exists" ]]; then
           echo "A pull request already exists."
-          echo "GITHUB_PR_EXIST=true"
+          echo "GITHUB_PR_EXIST=true" >> $GITHUB_ENV
           exit 0
         fi
 
@@ -76,38 +76,40 @@ jobs:
         echo "Check for dependency updates"
         # Check for dependency updates
         dependency_updates=$(mvn versions:display-dependency-updates)
-
-        # Only continue if there are new dependencies
-        echo "$GITHUB_PR_EXIST"
-        if [[ "$GITHUB_PR_EXIST" == 'false' ]] && [[ "$dependency_updates" == *"newer versions"* ]]; then
-          echo "Outdated dependencies found."
-
-          # Update dependencies to the latest versions
-          mvn versions:use-latest-versions -DallowSnapshots=false
-          mvn versions:update-parent -DartifactId=spring-boot-starter-parent -DgroupId=org.springframework.boot
-
-          echo "Check if there are changes in pom.xml"
-          if ! git diff --exit-code --quiet; then
-            echo "Changes detected, creating a pull request."
-
-            # Generate a unique branch name and create new branch for the update
-            branch_name="update-dependencies-$(date +%Y%m%d%H%M%S)"
-            git checkout -b "$branch_name"
-
-            # Set git user details for commit
-            git config --global user.name "Github Actions"
-            git config --global user.email "actions@github.com"
-
-            # Commit, push the change, and create a PR
-            git add pom.xml
-            git commit -m "Update dependencies"
-            git push origin "$branch_name"
-            gh pr create --base main --head "$branch_name" --title "${{ vars.DEPENDENCY_MANUAL_UPDATE_TITLE }}" --body "Automated dependency updates"
+        
+        # Only continue when the pr is not exist
+        if [[ "$GITHUB_PR_EXIST" == 'false' ]]; then
+          # Only continue if there are new dependencies
+          if [[ "$dependency_updates" == *"newer versions"* ]]; then
+            echo "Outdated dependencies found."
+  
+            # Update dependencies to the latest versions
+            mvn versions:use-latest-versions -DallowSnapshots=false
+            mvn versions:update-parent -DartifactId=spring-boot-starter-parent -DgroupId=org.springframework.boot
+  
+            echo "Check if there are changes in pom.xml"
+            if ! git diff --exit-code --quiet; then
+              echo "Changes detected, creating a pull request."
+  
+              # Generate a unique branch name and create new branch for the update
+              branch_name="update-dependencies-$(date +%Y%m%d%H%M%S)"
+              git checkout -b "$branch_name"
+  
+              # Set git user details for commit
+              git config --global user.name "Github Actions"
+              git config --global user.email "actions@github.com"
+  
+              # Commit, push the change, and create a PR
+              git add pom.xml
+              git commit -m "Update dependencies"
+              git push origin "$branch_name"
+              gh pr create --base main --head "$branch_name" --title "${{ vars.DEPENDENCY_MANUAL_UPDATE_TITLE }}" --body "Automated dependency updates"
+            else
+              echo "No changes detected in pom.xml. No pull request needed."
+            fi
           else
-            echo "No changes detected in pom.xml. No pull request needed."
+            echo "No outdated dependencies found."
           fi
-        else
-          echo "No outdated dependencies found."
         fi
 
   test:
