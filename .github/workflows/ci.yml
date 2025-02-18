@@ -78,6 +78,7 @@ jobs:
         dependency_updates=$(mvn versions:display-dependency-updates)
 
         # Only continue if there are new dependencies
+        echo "$GITHUB_PR_EXIST"
         if [[ "$GITHUB_PR_EXIST" == 'false' ]] && [[ "$dependency_updates" == *"newer versions"* ]]; then
           echo "Outdated dependencies found."
 
