@@ -71,14 +71,13 @@ jobs:
           exit 0
         fi
 
-    - name: Create Pull Request if Dependencies are outdated
+    - name: Create Pull Request if not exists and dependencies are outdated
       run: |
-        echo "Check for dependency updates"
-        # Check for dependency updates
-        dependency_updates=$(mvn versions:display-dependency-updates)
-        
         # Only continue when the pr is not exist
         if [[ "$GITHUB_PR_EXIST" == 'false' ]]; then
+          # Check for dependency updates
+          echo "Check for dependency updates"
+          dependency_updates=$(mvn versions:display-dependency-updates)
           # Only continue if there are new dependencies
           if [[ "$dependency_updates" == *"newer versions"* ]]; then
             echo "Outdated dependencies found."
