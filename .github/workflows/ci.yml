@@ -1,10 +1,10 @@
-name: Java CI with Maven
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "dev/*" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "dev/*" ]
 
 jobs:     
   build:
@@ -132,12 +132,16 @@ jobs:
     - name: Run Tests Complete
       run: echo "Run Tests Completed"
       
-  build-and-push-docker-image:
+  deploy-to-staging:
+    if: startsWith(github.ref, 'ref/heads'dev/')
     needs: test
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Deploy to Staging
+        run: echo "Deploying to staging"
 
       # Login to the Docker Hub
       - name: Login to Docker Hub
@@ -181,3 +185,16 @@ jobs:
 
       - name: Build and Push Docker Image Complete
         run: echo "Build and Push Docker Image Complete" 
+
+  deploy-to-production:
+    if: startsWith(github.ref, 'ref/heads'main/')
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Production
+        run: |
+          echo "Deploying to production"
+          # The production deployment script goes here.
