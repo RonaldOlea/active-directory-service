@@ -4,7 +4,7 @@ on:
   push:
     branches: [ "main", "dev/*" ]
   pull_request:
-    branches: [ "main", "dev/*" ]
+    branches: [ "main", "staging" ]
 
 jobs:
   build:
@@ -133,7 +133,7 @@ jobs:
       run: echo "Run Tests Completed"
       
   deploy-to-staging:
-    if: startsWith(github.ref, 'refs/heads/dev/')
+    if: github.ref == 'refs/heads/staging'
     needs: test
     runs-on: ubuntu-latest
 
