@@ -133,7 +133,7 @@ jobs:
       run: echo "Run Tests Completed"
       
   deploy-to-staging:
-    if: github.ref == 'refs/heads/staging'
+    if: github.event.pull_request.base.ref == 'staging'
     needs: test
     runs-on: ubuntu-latest
 
