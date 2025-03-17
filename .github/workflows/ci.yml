@@ -7,6 +7,7 @@ on:
     branches: [ "main", "staging" ]
 
 jobs:
+  # Build Job - This will build the application
   build:
     runs-on: ubuntu-latest
 
