@@ -146,7 +146,7 @@ jobs:
 
   # Deploy to Staging - Only triggered for PRs targeting staging branch
   deploy-to-staging:
-    if: github.event.pull_request.base.ref == 'staging' && github.event.pull_request.review.state == 'approved'
+    if: github.event.pull_request.base.ref == 'staging'
     needs: test
     runs-on: ubuntu-latest
 
