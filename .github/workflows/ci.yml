@@ -2,7 +2,7 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main", "dev/*" ]
+    branches: [ "main", "staging", "dev/*" ]
   pull_request:
     branches: [ "main", "staging" ]
 
@@ -144,9 +144,9 @@ jobs:
     - name: Run Tests Complete
       run: echo "Run Tests Completed"
 
-  # Deploy to Staging - Only triggered for PRs targeting staging branch
+  # Deploy to Staging - Triggered when changes are pushed to the staging branch
   deploy-to-staging:
-    if: github.event.pull_request.base.ref == 'staging' && github.event.pull_request.review.state == 'approved'
+    if: github.ref == 'refs/heads/staging'
     needs: test
     runs-on: ubuntu-latest
 
