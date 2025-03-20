@@ -14,7 +14,7 @@ on:
 jobs:
   # Shared jobs for all branches
 
- # Dependency Check Job - Check and update Maven dependencies
+  # Dependency Check Job - Check and update Maven dependencies
   dependency-check:
     needs: build
     runs-on: ubuntu-latest
@@ -96,8 +96,8 @@ jobs:
           fi
         fi
         
-    - name: Run dependency check
-      run: echo "Run dependency check completed." #update to include branch name
+    - name: Dependency Check Complete
+      run: echo "Dependency Check Completed on branch ${GITHUB_REF#refs/heads/}"
 
   # Static Code Scan
   static-code-scan:
@@ -109,7 +109,7 @@ jobs:
 
        # Insert step for static code scan as appropriate
       
-      - name: Run static code scan
+      - name: Static Code Scan Complete
         run: echo "Static Code Scan Completed on branch ${GITHUB_REF#refs/heads/}"
   
   # Build Job - This will build the application
@@ -140,7 +140,7 @@ jobs:
     - name: Build with Maven
       run:  mvn -B package --file pom.xml -DskipTests
 
-    - name: Run Build Complete
+    - name: Build Complete
       run: echo "Build Completed on branch ${GITHUB_REF#refs/heads/}"
 
     - name: Upload jar as artifact
@@ -169,7 +169,7 @@ jobs:
     - name: Run Tests
       run: mvn test -X
   
-    - name: Run Tests Complete
+    - name: Tests Complete
       run: echo "Unit Tests Completed on branch ${GITHUB_REF#refs/heads/}"
 
   # Build and Push Docker Image
@@ -273,6 +273,9 @@ jobs:
           # Replace with actual deployment commands
           ./deploy.sh(( matrix.env ))
 
+      - name: Deployment Complete
+        run: echo "Deployment Completed on branch ${GITHUB_REF#refs/heads/}"
+
   # Hotfix merge propagation
   propagate-hot-fix:
     runs-on: ubuntu-latest
@@ -305,4 +308,6 @@ jobs:
           body: |
             This pull request merges hotfix changes from the main branch into the development branch.
           labes: hotfix, development
-    
+
+      - name: Propagate Hotfix Complete
+        run: echo "Propagate Hotfix Completed on branch ${GITHUB_REF#refs/heads/}"
