@@ -271,7 +271,7 @@ jobs:
         run: |
           echo "Deploying to ${{ matrix.env }} environment"
           # Replace with actual deployment commands
-          ./deploy.sh(( matrix.env ))
+          #./deploy.sh(( matrix.env ))
 
       - name: Deployment Complete
         run: echo "Deployment Completed on branch ${GITHUB_REF#refs/heads/}"
