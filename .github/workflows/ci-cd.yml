@@ -16,7 +16,6 @@ jobs:
 
   # Dependency Check Job - Check and update Maven dependencies
   dependency-check:
-    needs: build
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -114,6 +113,7 @@ jobs:
   
   # Build Job - This will build the application
   build:
+    needs: static-code-scan
     runs-on: ubuntu-latest
 
     steps:
@@ -174,9 +174,9 @@ jobs:
 
   # Build and Push Docker Image
   build-and-push-docker-image:
-    runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     needs: [dependency-check,static-code-scan,unit-tests]
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         env:
@@ -254,9 +254,9 @@ jobs:
 
   # Deployment jobs specific to environments
   deploy:
-    runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     needs: build-and-push-docker-image
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         env:
@@ -278,9 +278,9 @@ jobs:
 
   # Hotfix merge propagation
   propagate-hot-fix:
-    runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'hotfix/')
     needs: build-and-push-docker-image
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         env:
