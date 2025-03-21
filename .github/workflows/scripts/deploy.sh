@@ -41,8 +41,6 @@ az containerapp update \
 # Verify the deployment
 echo "Deployment to $APP_ENV environment completed!"
 
-
-
 # Log in to Docker Hub
 #if images are pushed to docker hub
 echo "Logging in to Docker Hub..."
