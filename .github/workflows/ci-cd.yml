@@ -1,0 +1,313 @@
+name: CI/CD Pipeline 
+
+on:
+  push:
+    branches:
+      - 'feature/*'
+      - 'hotfix/*'
+  pull_request:
+    branches:
+      - development
+      - qa
+      - main
+
+jobs:
+  # Shared jobs for all branches
+
+  # Dependency Check Job - Check and update Maven dependencies
+  dependency-check:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_PR_EXIST: 'false'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+
+    # Cache Maven dependencies to speed up builds
+    - name: Cache Maven dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+
+    - name: Install dependencies using maven
+      run: mvn install -DskipTests
+
+    - name: Check if a Pull Request exists
+      run: |
+        # Check if there is an open pull request with the title "${{ vars.DEPENDENCY_MANUAL_UPDATE_TITLE }}"
+        pr_exists=$(gh pr list --state open --search "${{ vars.DEPENDENCY_MANUAL_UPDATE_TITLE }}" --json title -q ".[].title")
+        if [[ ! -z "$pr_exists" ]]; then
+          echo "A pull request already exists."
+          echo "GITHUB_PR_EXIST=true" >> $GITHUB_ENV
+        else
+          echo "Pull Request not found"
+        fi
+
+    - name: Create Pull Request if not exists and dependencies are outdated
+      run: |
+        # Only continue when the pr is not exist
+        if [[ "$GITHUB_PR_EXIST" == 'false' ]]; then
+          # Check for dependency updates
+          echo "Check for dependency updates"
+          dependency_updates=$(mvn versions:display-dependency-updates)
+          # Only continue if there are new dependencies
+          if [[ "$dependency_updates" == *"newer versions"* ]]; then
+            echo "Outdated dependencies found."
+  
+            # Update dependencies to the latest versions
+            mvn versions:use-latest-versions -DallowSnapshots=false
+            mvn versions:update-parent -DartifactId=spring-boot-starter-parent -DgroupId=org.springframework.boot
+  
+            echo "Check if there are changes in pom.xml"
+            if ! git diff --exit-code --quiet; then
+              echo "Changes detected, creating a pull request."
+  
+              # Generate a unique branch name and create new branch for the update
+              branch_name="update-dependencies-$(date +%Y%m%d%H%M%S)"
+              git checkout -b "$branch_name"
+  
+              # Set git user details for commit
+              git config --global user.name "Github Actions"
+              git config --global user.email "actions@github.com"
+  
+              # Commit, push the change, and create a PR
+              git add pom.xml
+              git commit -m "Update dependencies"
+              git push origin "$branch_name"
+              gh pr create --base main --head "$branch_name" --title "${{ vars.DEPENDENCY_MANUAL_UPDATE_TITLE }}" --body "Automated dependency updates"
+            else
+              echo "No changes detected in pom.xml. No pull request needed."
+            fi
+          else
+            echo "No outdated dependencies found."
+          fi
+        fi
+        
+    - name: Dependency Check Complete
+      run: echo "Dependency Check Completed on branch ${GITHUB_REF#refs/heads/}"
+
+  # Static Code Scan
+  static-code-scan:
+    needs: dependency-check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+       # Insert step for static code scan as appropriate
+      
+      - name: Static Code Scan Complete
+        run: echo "Static Code Scan Completed on branch ${GITHUB_REF#refs/heads/}"
+  
+  # Build Job - This will build the application
+  build:
+    needs: static-code-scan
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+
+    # Cache Maven dependencies to speed up builds
+    - name: Cache Maven dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven-
+
+    # Build the application using Maven  
+    - name: Build with Maven
+      run:  mvn -B package --file pom.xml -DskipTests
+
+    - name: Build Complete
+      run: echo "Build Completed on branch ${GITHUB_REF#refs/heads/}"
+
+    - name: Upload jar as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ vars.JAR_NAME }}
+        path: target/*.jar
+
+  # Test Job - Run tests after build job completes
+  unit-tests:
+    needs: build
+    runs-on: ubuntu-latest
+  
+    steps: 
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+  
+    # Run tests using Maven
+    - name: Run Tests
+      run: mvn test -X
+  
+    - name: Tests Complete
+      run: echo "Unit Tests Completed on branch ${GITHUB_REF#refs/heads/}"
+
+  # Build and Push Docker Image
+  build-and-push-docker-image:
+    if: github.event_name == 'pull_request'
+    needs: [dependency-check,static-code-scan,unit-tests]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        env:
+          - development
+          - qa
+          - main
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Download the jar file.
+      - name: Download the JAR file
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ vars.JAR_NAME }}
+
+      - name: List directory after downloading artifact
+        run: ls -l
+
+      - name: Create the target directory and move the JAR file.
+        run: |
+          mkdir -p target
+          mv *.jar ./target
+    
+      # It helps you run builds on architectures like amd64, arm64, etc.
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      # It allows for multi-platform builds, build caching, and more efficient Docker image builds.
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Login to the Docker Hub
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Check Docker tag
+        run: echo "${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_IMAGE }}:${{ github.sha }}"
+          
+      - name: Build and Push Docker Image to DockerHub
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_IMAGE }}:${{ github.sha }}
+          context: .
+
+      #if using Azure Container Registry
+      #- name: Login to Azure Container Registry
+      #  uses: docker/login-action@v2
+      #  with: 
+      #    registry: ${{ secrets.AZURE_REGISTRY_NAME }}.azure.io
+      #    username: ${{ secrets.AZURE_REGISTRY_USERNAME }}
+      #    password: ${{ secrets.AZURE_REGISTRY_PASSWORD }}
+        # run: |
+          # echo ${{ secrets.AZURE_REGISTRY_PASSWORD }} | docker login myregistry.azure.io -u 
+          # ${{ secrets.AZURE_REGISTRY_USERNAME }}--password-stdin
+
+      #- name: Build and Push Docker Image to Azure Container Registry
+      #  uses: docker/build-push-action@v6
+      #  with:
+      #    push: true
+      #    tags: ${{ secrets.AZURE_REGISTRY_NAME }}.azure.io/my-app:${{ github.sha }}
+      #    context: .
+        # run: |
+          # docker build -t my-app:${{ github.sha }} .
+          # docker tag my-app:${{ github.sha }} myregistry.azurecr.io/my-app:${{ matrix.env }}
+          # docker push myregistry.azurecr.io/my-app:${{ matrix.env }}
+
+      - name: Build and Push Docker Image Complete
+        run: echo "Build and Push Docker Image Completed on branch ${GITHUB_REF#refs/heads/}"
+
+  # Deployment jobs specific to environments
+  deploy:
+    if: github.event_name == 'pull_request'
+    needs: build-and-push-docker-image
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        env:
+          - development
+          - qa
+          - main
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy to Environment
+        run: |
+          echo "Deploying to ${{ matrix.env }} environment"
+          # Replace with actual deployment commands
+          #./scripts/deploy.sh (( matrix.env ))
+
+      - name: Deployment Complete
+        run: echo "Deployment Completed on branch ${GITHUB_REF#refs/heads/}"
+
+  # Hotfix merge propagation
+  propagate-hot-fix:
+    if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'hotfix/')
+    needs: build-and-push-docker-image
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        env:
+          - main
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Create Pull Request to QA Branch
+        uses: peter-evans/create-pull-request@v4
+        with:
+          branch: qa
+          commit-message: "Propagate hotfix changes from main to QA"
+          title: "Merge hotfix changes from main to QA"
+          body: |
+            This pull request merges hotfix changes from the main branch into the QA branch.
+          labes: hotfix, qa
+
+      - name: Create Pull Request to Development Branch
+        uses: peter-evans/create-pull-request@v4
+        with:
+          branch: development
+          commit-message: "Propagate hotfix changes from main to Devlelopment"
+          title: "Merge hotfix from main to Development"
+          body: |
+            This pull request merges hotfix changes from the main branch into the development branch.
+          labes: hotfix, development
+
+      - name: Propagate Hotfix Complete
+        run: echo "Propagate Hotfix Completed on branch ${GITHUB_REF#refs/heads/}"
