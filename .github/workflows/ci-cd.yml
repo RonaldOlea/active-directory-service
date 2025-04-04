@@ -257,21 +257,21 @@ jobs:
     if: github.event_name == 'pull_request'
     needs: build-and-push-docker-image
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        env:
-          - development
-          - qa
-          - main
+   # strategy:
+   #   matrix:
+   #     env:
+   #       - development
+   #       - qa
+   #       - main
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Deploy to Environment
         run: |
-          echo "Deploying to ${{ matrix.env }} environment"
+          echo "Deploying to ${{ github.head_ref }} environment"
           # Replace with actual deployment commands
-          #./scripts/deploy.sh (( matrix.env ))
+          #./scripts/deploy.sh (( github.head_ref ))
 
       - name: Deployment Complete
         run: echo "Deployment Completed on branch ${GITHUB_REF#refs/heads/}"
