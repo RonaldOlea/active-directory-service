@@ -246,8 +246,8 @@ jobs:
       #    context: .
         # run: |
           # docker build -t my-app:${{ github.sha }} .
-          # docker tag my-app:${{ github.sha }} myregistry.azurecr.io/my-app:${{ github.head_ref }}
-          # docker push myregistry.azurecr.io/my-app:${{ github.head_ref }}
+          # docker tag my-app:${{ github.sha }} myregistry.azurecr.io/my-app:${{ github.base_ref }}
+          # docker push myregistry.azurecr.io/my-app:${{ github.base_ref }}
 
       - name: Build and Push Docker Image Complete
         run: echo "Build and Push Docker Image Completed on branch ${GITHUB_REF#refs/heads/}"
@@ -269,9 +269,9 @@ jobs:
 
       - name: Deploy to Environment
         run: |
-          echo "Deploying to ${{ github.head_ref }} environment"
+          echo "Deploying to ${{ github.base_ref }} environment"
           # Replace with actual deployment commands
-          #./scripts/deploy.sh (( github.head_ref ))
+          #./scripts/deploy.sh (( github.base_ref ))
 
       - name: Deployment Complete
         run: echo "Deployment Completed on branch ${GITHUB_REF#refs/heads/}"
