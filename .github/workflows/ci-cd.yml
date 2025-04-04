@@ -250,7 +250,7 @@ jobs:
           # docker push myregistry.azurecr.io/my-app:${{ github.base_ref }}
 
       - name: Build and Push Docker Image Complete
-        run: echo "Build and Push Docker Image Completed on branch ${GITHUB_REF#refs/heads/}"
+        run: echo "Build and Push Docker Image Completed on branch ${{ github.base_ref }}"
 
   # Deployment jobs specific to environments
   deploy:
@@ -274,7 +274,7 @@ jobs:
           #./scripts/deploy.sh (( github.base_ref ))
 
       - name: Deployment Complete
-        run: echo "Deployment Completed on branch ${GITHUB_REF#refs/heads/}"
+        run: echo "Deployment Completed on branch ${{ github.base_ref }}"
 
   # Hotfix merge propagation
   propagate-hot-fix:
