@@ -177,12 +177,12 @@ jobs:
     if: github.event_name == 'pull_request'
     needs: [dependency-check,static-code-scan,unit-tests]
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        env:
-          - development
-          - qa
-          - main
+   # strategy:
+   #   matrix:
+   #     env:
+   #       - development
+   #       - qa
+   #       - main
 
     steps:
       - name: Checkout code
@@ -246,8 +246,8 @@ jobs:
       #    context: .
         # run: |
           # docker build -t my-app:${{ github.sha }} .
-          # docker tag my-app:${{ github.sha }} myregistry.azurecr.io/my-app:${{ matrix.env }}
-          # docker push myregistry.azurecr.io/my-app:${{ matrix.env }}
+          # docker tag my-app:${{ github.sha }} myregistry.azurecr.io/my-app:${{ github.head_ref }}
+          # docker push myregistry.azurecr.io/my-app:${{ github.head_ref }}
 
       - name: Build and Push Docker Image Complete
         run: echo "Build and Push Docker Image Completed on branch ${GITHUB_REF#refs/heads/}"
