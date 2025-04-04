@@ -114,7 +114,12 @@ jobs:
        # Insert step for static code scan as appropriate
       
       - name: Static Code Scan Complete
-        run: echo "Static Code Scan Completed on ${{ github.base_ref }} branch."
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "Dependency Check Completed on ${{ github.base_ref }} branch."
+          else
+            echo "Dependency Check Completed on ${{ github.ref_name }} branch."
+          fi
   
   # Build Job - This will build the application
   build:
@@ -175,7 +180,12 @@ jobs:
       run: mvn test -X
   
     - name: Tests Complete
-      run: echo "Unit Tests Completed on ${{ github.base_ref }} branch."
+      run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "Dependency Check Completed on ${{ github.base_ref }} branch."
+          else
+            echo "Dependency Check Completed on ${{ github.ref_name }} branch."
+          fi
 
   # Build and Push Docker Image
   build-and-push-docker-image:
@@ -283,7 +293,7 @@ jobs:
 
   # Hotfix merge propagation
   propagate-hot-fix:
-    if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'hotfix/')
+    if: github.event_name == 'pull_request' && startsWith(github.ref_name, 'hotfix/')
     needs: build-and-push-docker-image
     runs-on: ubuntu-latest
     strategy:
@@ -315,4 +325,4 @@ jobs:
           labes: hotfix, development
 
       - name: Propagate Hotfix Complete
-        run: echo "Propagate Hotfix Completed on branch ${GITHUB_REF#refs/heads/}"
+        run: echo "Propagate Hotfix Completed on ${{ github.base_ref }} branch."
