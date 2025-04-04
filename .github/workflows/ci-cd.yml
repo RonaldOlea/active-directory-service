@@ -96,7 +96,12 @@ jobs:
         fi
         
     - name: Dependency Check Complete
-      run: echo "Dependency Check Completed on ${{ github.base_ref }} branch."
+      run: |
+        if: [ "${{ github.event_name }}" = "pull_request" ]; then
+          echo "Dependency Check Completed on ${{ github.base_ref }} branch."
+        else
+          run: echo "Dependency Check Completed on ${{ github.head_ref }} branch."
+        fi
 
   # Static Code Scan
   static-code-scan:
