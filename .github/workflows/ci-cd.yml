@@ -96,7 +96,12 @@ jobs:
         fi
         
     - name: Dependency Check Complete
-      run: echo "Dependency Check Completed on branch ${GITHUB_REF#refs/heads/}"
+      run: |
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          echo "Dependency Check Completed on ${{ github.base_ref }} branch."
+        else
+          echo "Dependency Check Completed on ${{ github.ref_name }} branch."
+        fi
 
   # Static Code Scan
   static-code-scan:
@@ -109,7 +114,12 @@ jobs:
        # Insert step for static code scan as appropriate
       
       - name: Static Code Scan Complete
-        run: echo "Static Code Scan Completed on branch ${GITHUB_REF#refs/heads/}"
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "Dependency Check Completed on ${{ github.base_ref }} branch."
+          else
+            echo "Dependency Check Completed on ${{ github.ref_name }} branch."
+          fi
   
   # Build Job - This will build the application
   build:
@@ -141,7 +151,12 @@ jobs:
       run:  mvn -B package --file pom.xml -DskipTests
 
     - name: Build Complete
-      run: echo "Build Completed on branch ${GITHUB_REF#refs/heads/}"
+      run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "Dependency Check Completed on ${{ github.base_ref }} branch."
+          else
+            echo "Dependency Check Completed on ${{ github.ref_name }} branch."
+          fi
 
     - name: Upload jar as artifact
       uses: actions/upload-artifact@v4
@@ -170,7 +185,12 @@ jobs:
       run: mvn test -X
   
     - name: Tests Complete
-      run: echo "Unit Tests Completed on branch ${GITHUB_REF#refs/heads/}"
+      run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "Dependency Check Completed on ${{ github.base_ref }} branch."
+          else
+            echo "Dependency Check Completed on ${{ github.ref_name }} branch."
+          fi
 
   # Build and Push Docker Image
   build-and-push-docker-image:
@@ -246,39 +266,39 @@ jobs:
       #    context: .
         # run: |
           # docker build -t my-app:${{ github.sha }} .
-          # docker tag my-app:${{ github.sha }} myregistry.azurecr.io/my-app:${{ github.head_ref }}
-          # docker push myregistry.azurecr.io/my-app:${{ github.head_ref }}
+          # docker tag my-app:${{ github.sha }} myregistry.azurecr.io/my-app:${{ github.base_ref }}
+          # docker push myregistry.azurecr.io/my-app:${{ github.base_ref }}
 
       - name: Build and Push Docker Image Complete
-        run: echo "Build and Push Docker Image Completed on branch ${GITHUB_REF#refs/heads/}"
+        run: echo "Build and Push Docker Image Completed on ${{ github.base_ref }} branch."
 
   # Deployment jobs specific to environments
   deploy:
     if: github.event_name == 'pull_request'
     needs: build-and-push-docker-image
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        env:
-          - development
-          - qa
-          - main
+   # strategy:
+   #   matrix:
+   #     env:
+   #       - development
+   #       - qa
+   #       - main
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Deploy to Environment
         run: |
-          echo "Deploying to ${{ matrix.env }} environment"
+          echo "Deploying to ${{ github.base_ref }} environment"
           # Replace with actual deployment commands
-          #./scripts/deploy.sh (( matrix.env ))
+          #./scripts/deploy.sh (( github.base_ref ))
 
       - name: Deployment Complete
-        run: echo "Deployment Completed on branch ${GITHUB_REF#refs/heads/}"
+        run: echo "Deployment Completed on ${{ github.base_ref }} branch."
 
   # Hotfix merge propagation
   propagate-hot-fix:
-    if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'hotfix/')
+    if: github.event_name == 'pull_request' && startsWith(github.ref_name, 'hotfix/')
     needs: build-and-push-docker-image
     runs-on: ubuntu-latest
     strategy:
@@ -310,4 +330,4 @@ jobs:
           labes: hotfix, development
 
       - name: Propagate Hotfix Complete
-        run: echo "Propagate Hotfix Completed on branch ${GITHUB_REF#refs/heads/}"
+        run: echo "Propagate Hotfix Completed on ${{ github.base_ref }} branch."
