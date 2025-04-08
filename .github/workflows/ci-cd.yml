@@ -298,7 +298,7 @@ jobs:
 
   # Hotfix merge propagation
   propagate-hot-fix:
-    if: github.event_name == 'pull_request' && startsWith(github.ref_name, 'hotfix/')
+    if: github.event_name == 'pull_request' && startsWith(github.head_ref, 'hotfix/')
     needs: build-and-push-docker-image
     runs-on: ubuntu-latest
     strategy:
